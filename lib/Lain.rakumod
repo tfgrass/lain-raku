@@ -2,7 +2,7 @@ unit module Lain;
 
 
 # Function to handle CLI commands
-sub run-cli(@args) is export {
+our sub run-cli(@args) {
 
     my $command = @args[0] // 'help';
     # Load all commands from system and user directories

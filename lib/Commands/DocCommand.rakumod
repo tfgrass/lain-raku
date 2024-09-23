@@ -1,4 +1,4 @@
-unit module Lain::Commands::DocCommand;
+unit module Commands::DocCommand;
 
 use Lain::CommandRegistry;
 
