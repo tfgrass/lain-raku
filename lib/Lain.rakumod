@@ -1,19 +1,24 @@
 unit module Lain;
 
+use Lain::CommandRegistry;
+use Lain::CommandLoader;
 
-# Function to handle CLI commands
-our sub run-cli(@args) {
-
-    my $command = @args[0] // 'help';
-    # Load all commands from system and user directories
+our sub run-cli(@args) is export {
     Lain::CommandLoader::load-commands();
 
-    # Find the registered command and execute it
-    my &handler = Lain::CommandRegistry::get-command($command);
-    if &handler {
-        &handler(@args);  # Pass the @args to the command handler
+    my $command = @args.shift // 'help';
+
+    if my $command-sub = get-command($command) {
+        $command-sub(@args);
     } else {
         say "Unknown command: $command";
-        say "Available commands: {Lain::CommandRegistry::list-commands.join(', ')}";
     }
 }
+
+register-command('help', -> @args {
+    say "Usage: lain <command> [arguments]";
+    say "Commands:";
+    for list-commands() -> $cmd {
+        say "  $cmd";
+    }
+});

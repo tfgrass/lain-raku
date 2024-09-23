@@ -5,6 +5,9 @@ use Lain;       # Import the Entry-Module
 use Lain::CommandLoader;
 use Lain::CommandRegistry;
 use Commands::DocCommand;
-my @args = @*ARGS;
-# let the Entry-Module handle the CLI arguments
+use Lain::CLI;
+
+my @args = normalize-args(@*ARGS);
+
 Lain::run-cli(@args);
+
