@@ -1,0 +1,13 @@
+{
+    "name": "Lain",
+    "version": "0.0.1",
+    "author": "your_name",
+    "license": "Artistic-2.0",
+    "source-url": "https://github.com/yourusername/lain",
+    "depends": [
+        "HTTP::UserAgent"
+    ],
+    "provides": {
+        "Lain": "lib/Lain.rakumod"
+    }
+}

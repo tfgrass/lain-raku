@@ -1,0 +1,7 @@
+#!/usr/bin/env raku
+
+use lib 'lib';  # Add the lib directory to the module search path
+use Lain;       # Import the Entry-Module
+
+# let the Entry-Module handle the CLI arguments
+Lain::run-cli(@*ARGS);
