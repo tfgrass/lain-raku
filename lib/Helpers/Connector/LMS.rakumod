@@ -15,6 +15,7 @@ class LMSConnector {
     }
 
     method send(Str $code-content, Str :$existing-doc?) {
+        say ' in send';
         my %headers = "Content-Type" => "application/json";
 
         my $user-message = $existing-doc ??
@@ -39,13 +40,16 @@ class LMSConnector {
 
         return supply {
             start {
+                say 'in start supply';
                 my $response-promise = $client.post: $.api-url, :%headers, body => JSON::Fast::to-json(%payload);
-
+                dd %payload;
+                dd $response-promise;
                 # Declare and assign $body-supply using the response promise
                 my $body-supply = $response-promise.Supply;
 
                 # Process each line of the response and emit tokens as they become available
                 $body-supply.lines.tap( -> $line {
+                    say $line;
                     $line .= trim;
                     return unless $line;
                     if $line.starts-with('data: ') {

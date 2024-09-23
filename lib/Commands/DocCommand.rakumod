@@ -48,7 +48,7 @@ sub generate-documentation(
 
     my $response-supply = $lms-connector.send($code-content, :$existing-doc);
 
-    $*OUT.autoflush = True;
+    $*OUT.flush;
 
     say "Generating documentation for '{$source-file}'...\n";
 
