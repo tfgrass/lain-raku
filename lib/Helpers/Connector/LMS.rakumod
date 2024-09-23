@@ -14,65 +14,68 @@ class LMSConnector {
         self.bless(:$api-url, :$model-name);
     }
 
+
+
     method send(Str $code-content, Str :$existing-doc?) {
-        say ' in send';
-        my %headers = "Content-Type" => "application/json";
+        say 'In send';
 
-        my $user-message = $existing-doc ??
-            "Update the following documentation with the new code:\n\nCode:\n{$code-content}\n\nExisting Documentation:\n{$existing-doc}"
-            !!
-            "Generate detailed markdown documentation for the following code:\n\n{$code-content}";
-
-        my @messages = (
-            { role => "system", content => $.system-message },
-            { role => "user", content => $user-message }
+        my %headers = (
+            "Content-Type"  => "application/json",
         );
 
-        my %payload = (
-            model       => $.model-name,
-            messages    => @messages,
-            temperature => $.temperature,
-            max_tokens  => $.max-tokens,
-            stream      => True
-        );
+    my $user-message = $existing-doc ??
+        "Update the following documentation with the new code:\n\nCode:\n{$code-content}\n\nExisting Documentation:\n{$existing-doc}"
+        !!
+        "Generate detailed markdown documentation for the following code:\n\n{$code-content}";
 
-        my $client = Cro::HTTP::Client.new;
+    my @messages = (
+        { role => "system", content => $.system-message },
+        { role => "user", content => $user-message }
+    );
 
-        return supply {
-            start {
-                say 'in start supply';
-                my $response-promise = $client.post: $.api-url, :%headers, body => JSON::Fast::to-json(%payload);
-                dd %payload;
-                dd $response-promise;
-                # Declare and assign $body-supply using the response promise
-                my $body-supply = $response-promise.Supply;
+    my %payload = (
+        model       => $.model-name,
+        messages    => @messages,
+        temperature => $.temperature,
+        max_tokens  => $.max-tokens,
+        stream      => True
+    );
 
-                # Process each line of the response and emit tokens as they become available
-                $body-supply.lines.tap( -> $line {
-                    say $line;
-                    $line .= trim;
-                    return unless $line;
-                    if $line.starts-with('data: ') {
-                        my $data = $line.substr(6);
-                        return if $data eq '[DONE]';
-                        try {
-                            my $chunk-data = from-json $data;
-                            if $chunk-data<choices>:exists {
-                                my %delta = $chunk-data<choices>[0]<delta>;
-                                if %delta<content>:exists {
-                                    # Emit the token to the Supply
-                                    emit(%delta<content>);
-                                }
-                            }
-                        }
-                        CATCH {
-                            default {
-                                # Handle any errors within the tap block as needed
-                            }
-                        }
-                    }
+    my $json_payload = JSON::Fast::to-json(%payload);
+    say "Payload: $json_payload";
+
+    my $client = Cro::HTTP::Client.new(timeout => 60);  # Increased timeout
+
+    return supply {
+        start {
+            say 'Before await';
+            my $response = try await $client.post: $.api-url, :%headers, body => $json_payload;
+            if $! {
+                warn "Exception during HTTP request: $!";
+                emit "An error occurred";
+                done;
+                return;
+            }
+            say 'After await';
+
+            if $response.status == 200 {
+                say 'Request successful';
+                $response.body.tap(-> $chunk {
+                    say "Received chunk: $chunk";
+                    emit $chunk;
                 });
+                $response.body.wait;
+            }
+            else {
+                warn "Request failed with status {$response.status}";
+                say "Response Body: {$response.body.slurp-rest}";
+                emit "An error occurred";
+                done;
             }
         }
     }
 }
+
+
+}
+
