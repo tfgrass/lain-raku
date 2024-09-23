@@ -1,22 +1,19 @@
 unit module Lain;
 
+
 # Function to handle CLI commands
 sub run-cli(@args) is export {
-    my $command = @args[0] // 'help';
 
-    given $command {
-        when 'doc' {
-            say "Generating documentation for { @args[1] // 'file' }...";
-            # Call your LM Studio API here
-        }
-        when 'help' {
-            say "Usage: lain <command> [arguments]";
-            say "Commands:";
-            say "  doc    Generate documentation";
-            say "  help   Show this message";
-        }
-        default {
-            say "Unknown command: $command";
-        }
+    my $command = @args[0] // 'help';
+    # Load all commands from system and user directories
+    Lain::CommandLoader::load-commands();
+
+    # Find the registered command and execute it
+    my &handler = Lain::CommandRegistry::get-command($command);
+    if &handler {
+        &handler(@args);  # Pass the @args to the command handler
+    } else {
+        say "Unknown command: $command";
+        say "Available commands: {Lain::CommandRegistry::list-commands.join(', ')}";
     }
 }

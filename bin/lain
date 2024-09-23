@@ -2,6 +2,9 @@
 
 use lib 'lib';  # Add the lib directory to the module search path
 use Lain;       # Import the Entry-Module
-
+use Lain::CommandLoader;
+use Lain::CommandRegistry;
+use Commands::DocCommand;
+my @args = @*ARGS;
 # let the Entry-Module handle the CLI arguments
-Lain::run-cli(@*ARGS);
+Lain::run-cli(@args);
