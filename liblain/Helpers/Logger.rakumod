@@ -1,7 +1,8 @@
 unit module Helpers::Logger;
 
-my $instance;
+my $instance;         
 
+# Logger Singleton class
 class Logger {
     has Int $.log-level is rw = 0;
 

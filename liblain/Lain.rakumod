@@ -20,10 +20,3 @@ our sub run-cli(@args) is export {
     }
 }
 
-register-command('help', -> @args {
-    say "Usage: lain <command> [arguments]";
-    say "Commands:";
-    for list-commands() -> $cmd {
-        say "  $cmd";
-    }
-});
