@@ -7,7 +7,7 @@ class Logger {
     has Int $.log-level is rw;
 
     method new {
-        # Prevent multiple instantiation
+        # Ensure singleton
         return $instance if $instance.defined;
         $instance = self.bless(:log-level(3));  # Default log level
         return $instance;
@@ -20,6 +20,12 @@ class Logger {
     }
 }
 
+# Return the singleton instance of Logger
 sub logger is export {
-    return Logger.new;  # Always return the Singleton instance
+    return Logger.new;
+}
+
+# Global log function that simplifies logging
+sub log(Int $level, Str $message) is export {
+    logger().log($level, $message);
 }

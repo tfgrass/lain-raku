@@ -4,8 +4,9 @@ use Lain::CommandRegistry;
 use Helpers::Connector::LMS;
 use Helpers::Logger;
 
-my $log = logger();
-$log.log(1, "-- FROM Commands::DocCommand");
+
+# Log a message
+log(1, "-- FROM Commands::DocCommand");
 
 
 register-command('doc', -> @args {
