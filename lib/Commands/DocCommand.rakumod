@@ -5,7 +5,6 @@ use Helpers::Connector::LMS;
 use Helpers::Logger;
 
 # Log a message
-log(1, "-- FROM Commands::DocCommand");
 
 register-command('doc', -> @args {
     my $source-file = @args[0] // '';
@@ -32,6 +31,7 @@ register-command('doc', -> @args {
     # Wait for the documentation generation to complete
     await $promise;
 });
+
 sub generate-documentation(
     Helpers::Connector::LMS::LMSConnector $lms_connector,
     Str $source-file,
@@ -56,6 +56,14 @@ sub generate-documentation(
 
     say "Generating documentation for '{$source-file}'...\n";
 
+    # Define the system message
+    my $system_message = "You are a documentation generator. Given code, generate or update detailed markdown documentation for the code file. Summarize what the whole code does and then go into details on each function, class, and variable.";
+
+    # Construct the user message
+    my $user_message = $existing-doc.chars > 0
+        ?? "Update the following documentation with the new code:\n\nCode:\n{$code-content}\n\nExisting Documentation:\n{$existing-doc}"
+        !! "Generate detailed markdown documentation for the following code:\n\n{$code-content}";
+
     # Define a closure to handle partial content
     my $on-content = sub ($partial-content) {
         print $partial-content;           # Print to console
@@ -65,7 +73,11 @@ sub generate-documentation(
     # Start an asynchronous block
     my $promise = start {
         try {
-            await $lms_connector.send($code-content, :$existing-doc, :$on-content);
+            await $lms_connector.send(
+                system-message => $system_message,
+                user-message   => $user_message,
+                on-content     => $on-content
+            );
         }
         CATCH {
             default {

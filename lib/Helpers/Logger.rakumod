@@ -3,7 +3,7 @@ unit module Helpers::Logger;
 my $instance;
 
 class Logger {
-    has Int $.log-level is rw;
+    has Int $.log-level is rw = 0;
 
     method new {
         # Ensure singleton

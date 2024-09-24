@@ -9,25 +9,24 @@ class LMSConnector {
     has Str $.model-name is rw;
     has Int $.max-tokens is rw = -1;
     has Rat $.temperature is rw = 0.7;
-    has Str $.system-message is rw = "You are a documentation generator. Given code, generate or update detailed markdown documentation for the code file. Summarize what the whole code does and then go into details on each function, class, and variable.";
 
     method new(:$api-url!, :$model-name!) {
         self.bless(:$api-url, :$model-name);
     }
 
-    method send(Str $code-content, Str :$existing-doc?, Callable :$on-content!) {
+    method send(
+        Str :$system-message!,
+        Str :$user-message!,
+        Callable :$on-content!
+    ) {
         log(1, 'in send');
 
         my %headers = (
             "Content-Type" => "application/json",
         );
 
-        my $user-message = $existing-doc
-            ?? "Update the following documentation with the new code:\n\nCode:\n{$code-content}\n\nExisting Documentation:\n{$existing-doc}"
-            !! "Generate detailed markdown documentation for the following code:\n\n{$code-content}";
-
         my @messages = (
-            { role => "system", content => $.system-message },
+            { role => "system", content => $system-message },
             { role => "user", content => $user-message }
         );
 
@@ -75,7 +74,10 @@ class LMSConnector {
                                 if $line.starts-with('data: ') {
                                     my $json-str = $line.substr('data: '.chars);
                                     if $json-str eq '[DONE]' {
+                                        $on-content("\n");  # finish with a new line
+
                                         log(1, "Streaming completed");
+
                                         # Signal completion and exit the react block
                                         $done-promise.keep;
                                         done;

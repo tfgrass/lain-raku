@@ -1,15 +1,17 @@
 #!/usr/bin/env raku
 
 use lib 'lib';  # Add the lib directory to the module search path
+use Helpers::Logger;  # Import the logger module, which exports the log function
+
 use Lain;       # Import the Entry-Module
 use Lain::CommandLoader;
 use Lain::CommandRegistry;
 use Commands::DocCommand;
+use Commands::AskCommand;
 use Lain::CLI;
-use Helpers::Logger;  # Import the logger module, which exports the log function
 
 # Set the log level at initialization
-logger().log-level = 3;  # You can still set the log level globally here
+logger().log-level = 0;  # You can still set the log level globally here
 
 # Log some messages
 log(1, "This is a low-level log.");
