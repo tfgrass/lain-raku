@@ -46,7 +46,7 @@ Users can define their own templates for system and user messages, providing fle
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/lain.git
+   git clone https://github.com/tfgrass/lain.git
    ```
 2. Install dependencies and build the project.
 

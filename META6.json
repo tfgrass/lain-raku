@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "author": "your_name",
     "license": "Artistic-2.0",
-    "source-url": "https://github.com/yourusername/lain",
+    "source-url": "https://github.com/tfgrass/lain",
     "depends": [
         "HTTP::UserAgent"
     ],
