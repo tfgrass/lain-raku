@@ -21,8 +21,7 @@ our sub run-cli(@args) is export {
             say "  $cmd";
         }
         
-    }
-    elsif my $command-sub = get-command($command) {
+    } elsif my $command-sub = get-command($command) {
         $command-sub(@args);
     } else {
         say "Unknown command: $command";

@@ -10,7 +10,7 @@ class LMSConnector {
     has Int $.max-tokens is rw = -1;
     has Rat $.temperature is rw = 0.7;
 
-    method new(:$api-url!, :$model-name!) {
+    method new(:$api-url = 'http://127.0.0.1:1234/v1/chat/completions' , :$model-name = '') {
         self.bless(:$api-url, :$model-name);
     }
 

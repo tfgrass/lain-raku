@@ -6,17 +6,17 @@ use Helpers::Logger;
 
 register-command('ask', -> @args {
     my $question = @args[0] // '';
-
+    
+    # exit if no question is provided
     unless $question {
-        say "lain> You wanna talk?";
+        say "lain is in the chatroom. Ask a question.";
         say "Usage: lain ask <question> ";
         exit 1;
     }
 
 
     my $lms_connector = Helpers::Connector::LMS::LMSConnector.new(
-        api-url    => "http://127.0.0.1:1234/v1/chat/completions",
-        model-name => "lmstudio-community/Codestral-22B-v0.1-GGUF/Codestral-22B-v0.1-Q4_K_M.gguf"
+#        model-name => "lmstudio-community/Codestral-22B-v0.1-GGUF/Codestral-22B-v0.1-Q4_K_M.gguf"
     );
 
     $lms_connector.max-tokens = 75;
