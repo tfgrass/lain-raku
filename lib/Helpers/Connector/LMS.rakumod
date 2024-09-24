@@ -15,63 +15,106 @@ class LMSConnector {
         self.bless(:$api-url, :$model-name);
     }
 
-method send(Str $code-content, Str :$existing-doc?) {
-log(1, 'in send');
-    my %headers = (
-        "Content-Type" => "application/json",
-    );
+    method send(Str $code-content, Str :$existing-doc?, Callable :$on-content!) {
+        log(1, 'in send');
 
-    my $user-message = $existing-doc
-        ?? "Update the following documentation with the new code:\n\nCode:\n{$code-content}\n\nExisting Documentation:\n{$existing-doc}"
-        !! "Generate detailed markdown documentation for the following code:\n\n{$code-content}";
+        my %headers = (
+            "Content-Type" => "application/json",
+        );
 
-    my @messages = (
-        { role => "system", content => $.system-message },
-        { role => "user", content => $user-message }
-    );
+        my $user-message = $existing-doc
+            ?? "Update the following documentation with the new code:\n\nCode:\n{$code-content}\n\nExisting Documentation:\n{$existing-doc}"
+            !! "Generate detailed markdown documentation for the following code:\n\n{$code-content}";
 
-    my %payload = (
-        model       => $.model-name,
-        messages    => @messages,
-        temperature => $.temperature,
-        max_tokens  => $.max-tokens,
-        # Removed 'stream' parameter as we're not streaming
-    );
+        my @messages = (
+            { role => "system", content => $.system-message },
+            { role => "user", content => $user-message }
+        );
 
-    my $json_payload = JSON::Fast::to-json(%payload);
-    log(1, "Payload: $json_payload");
+        my %payload = (
+            model       => $.model-name,
+            messages    => @messages,
+            temperature => $.temperature,
+            max_tokens  => $.max-tokens,
+            stream      => True,  # Enable streaming
+        );
 
-    # Set connection, headers, and body timeouts to 3600 seconds, and keep the default value for total timeout (Inf)
-    my $client = Cro::HTTP::Client.new(timeout => { connection => 3600, headers => 3600, body => 3600 });
+        my $json_payload = to-json(%payload);
+        log(1, "Payload: $json_payload");
 
-    # Using Raku's built-in try for error handling
-    my $response = try {
-        await $client.post: $.api-url, :%headers, body => $json_payload;
-    };
+        my $client = Cro::HTTP::Client.new();
 
-    if $response.defined {
-        log(1,"Received response with status {$response.status}");
+        # Return a Promise
+        return start {
+            # Await the HTTP response
+            my $response = await $client.post($.api-url, :%headers, body => $json_payload);
 
-       if $response.status == 200 {
-    # Await the response body to ensure we get the full content
-    my %response-body = await $response.body;
+            if $response.defined {
+                log(1, "Response status: {$response.status}");
+                if $response.status == 200 {
+                    log(1, "Response is OK, starting to process chunks...");
 
-    # Ensure that %response-body{'choices'} is an array and has content
-    if %response-body<choices> && %response-body<choices>[0]<message><content> {
-        my $message = %response-body<choices>[0]<message><content>;
-        log(1, "Generated Message: $message");
-        return { status => 'success', data => $message };
-    } else {
-        warn "No valid message found in the response.";
-        return { status => 'error', message => "No valid message found." };
+                    my $buffer = '';  # Buffer to accumulate partial data
+                    my $done-promise = Promise.new;  # Promise to signal completion
+
+                    # Use a react block to process the streaming response
+                    react {
+                        whenever $response.body-byte-stream -> $chunk {
+                            # Decode the chunk to a string (assuming UTF-8)
+                            my $data = $chunk.decode('utf8');
+                            log(5, "Received chunk: $data");
+
+                            # Append the new data to the buffer
+                            $buffer ~= $data;
+
+                            # Process complete lines in the buffer
+                            while $buffer ~~ /(.*?) \r? \n / {
+                                my $line = $0.Str;
+                                $buffer = $/.postmatch;
+
+                                if $line.starts-with('data: ') {
+                                    my $json-str = $line.substr('data: '.chars);
+                                    if $json-str eq '[DONE]' {
+                                        log(1, "Streaming completed");
+                                        # Signal completion and exit the react block
+                                        $done-promise.keep;
+                                        done;
+                                    } else {
+                                        try {
+                                            my %chunk-data = from-json $json-str;
+                                            if %chunk-data<choices> && %chunk-data<choices>[0]<delta><content> {
+                                                my $partial_content = %chunk-data<choices>[0]<delta><content>;
+                                                log(5, "Generated Partial Content: $partial_content");
+                                                # Call the provided content handler
+                                                $on-content($partial_content);
+                                            }
+                                        }
+                                        CATCH {
+                                            default {
+                                                log(1, "Error parsing chunk: {$json-str}");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        whenever $done-promise {
+                            log(1, "All chunks processed.");
+                        }
+                        CATCH {
+                            log(1, "error while streaming: $_");
+
+                        }
+                    }
+
+                    # Wait for the react block to complete
+                    await $done-promise;
+                } else {
+                    log(2, "Received non-OK response status: {$response.status}");
+                }
+            } else {
+                log(2, "No response received or response is undefined.");
+            }
+        }
     }
-}
-    }
-    else {
-        # Handle the case where the HTTP request failed
-        warn "Exception during HTTP request: {$!}";
-        return { status => 'error', message => "An error occurred: {$!}" };
-    }
-}
-
 }
