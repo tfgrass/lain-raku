@@ -2,6 +2,7 @@ unit module Helpers::Connector::LMS;
 
 use Cro::HTTP::Client;
 use JSON::Fast;
+use Helpers::Logger;
 
 class LMSConnector {
     has Str $.api-url is rw;
@@ -15,8 +16,7 @@ class LMSConnector {
     }
 
 method send(Str $code-content, Str :$existing-doc?) {
-    say 'In send';
-
+log(1, 'in send');
     my %headers = (
         "Content-Type" => "application/json",
     );
@@ -39,7 +39,7 @@ method send(Str $code-content, Str :$existing-doc?) {
     );
 
     my $json_payload = JSON::Fast::to-json(%payload);
-    say "Payload: $json_payload";
+    log(1, "Payload: $json_payload");
 
     # Set connection, headers, and body timeouts to 3600 seconds, and keep the default value for total timeout (Inf)
     my $client = Cro::HTTP::Client.new(timeout => { connection => 3600, headers => 3600, body => 3600 });
@@ -50,7 +50,7 @@ method send(Str $code-content, Str :$existing-doc?) {
     };
 
     if $response.defined {
-        say "Received response with status {$response.status}";
+        log(1,"Received response with status {$response.status}");
 
        if $response.status == 200 {
     # Await the response body to ensure we get the full content
@@ -59,7 +59,7 @@ method send(Str $code-content, Str :$existing-doc?) {
     # Ensure that %response-body{'choices'} is an array and has content
     if %response-body<choices> && %response-body<choices>[0]<message><content> {
         my $message = %response-body<choices>[0]<message><content>;
-        say "Generated Message: $message";
+        log(1, "Generated Message: $message");
         return { status => 'success', data => $message };
     } else {
         warn "No valid message found in the response.";
