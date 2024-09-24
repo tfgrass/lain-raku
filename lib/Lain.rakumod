@@ -3,6 +3,7 @@ unit module Lain;
 use Lain::CommandRegistry;
 use Lain::CommandLoader;
 
+
 our sub run-cli(@args) is export {
     Lain::CommandLoader::load-commands();
 

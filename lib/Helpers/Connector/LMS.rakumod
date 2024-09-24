@@ -6,8 +6,8 @@ use JSON::Fast;
 class LMSConnector {
     has Str $.api-url is rw;
     has Str $.model-name is rw;
-    has Int $.max-tokens = (-1);
-    has Rat $.temperature = 0.7;
+    has Int $.max-tokens is rw = -1;
+    has Rat $.temperature is rw = 0.7;
     has Str $.system-message is rw = "You are a documentation generator. Given code, generate or update detailed markdown documentation for the code file. Summarize what the whole code does and then go into details on each function, class, and variable.";
 
     method new(:$api-url!, :$model-name!) {
