@@ -33,7 +33,6 @@ sub generate-documentation(
         say "Error: The file '{$source-file}' does not exist.";
         return;
     }
-#dd $existing-doc-file;
 
     my $code-content = $source-file.IO.slurp;
 
@@ -46,18 +45,20 @@ sub generate-documentation(
 
     my $md-file = $output-file.IO.open(:w);
 
-    my $response-supply = $lms-connector.send($code-content, :$existing-doc);
+    my %response = $lms-connector.send($code-content, :$existing-doc);
 
     $*OUT.flush;
 
     say "Generating documentation for '{$source-file}'...\n";
 
-    $response-supply.tap(-> $content {
+    if %response<status> eq 'success' {
+        my $content = %response<data>;
         print $content;
         $md-file.print($content);
-    });
-
-    $response-supply.wait;
+    }
+    else {
+        say "Error generating documentation: {%response<message>}";
+    }
 
     $md-file.close;
 
