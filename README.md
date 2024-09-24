@@ -8,7 +8,6 @@ Lain is a CLI tool built in Raku that communicates with the LM Studio API. It al
 - **Template-driven**: System and user messages are template-based, allowing customization.
 - **Integration with LM Studio API**: Seamless communication with the LM Studio API.
 - **Cross-platform**: Designed to run on Linux and macOS.
-- **Distributed via Homebrew**: Easy installation and distribution via Homebrew.
 
 ### Example Use Case
 
@@ -38,11 +37,13 @@ Users can define their own templates for system and user messages, providing fle
    ```
    git clone https://github.com/tfgrass/lain.git
    ```
-2. Install dependencies and build the project.
-
+2. Install dependencies via Zef.
+3. Create a symlink to put lain into your $PATH
+   - alternativly just use bin/lain inside the repo
 ## Usage
+Start LM Studio, load a model and start the server. 
 
-After installation, you can run the `lain` command from your terminal:
+With LM Studio API running, you can run the `lain` command from your terminal:
 
 ```
 lain [command] [arguments]
