@@ -1,6 +1,6 @@
 #!/usr/bin/env raku
 
-use lib 'lib';  # Add the lib directory to the module search path
+use lib 'liblain';  # Add the lib directory to the module search path
 use Helpers::Logger;  # Import the logger module, which exports the log function
 
 use Lain;       # Import the Entry-Module

@@ -1,13 +1,11 @@
 {
     "name": "Lain",
     "version": "0.0.1",
-    "author": "your_name",
+    "author": "Tom F. Graßmann <tfgrass>",
     "license": "Artistic-2.0",
     "source-url": "https://github.com/tfgrass/lain",
     "depends": [
-        "HTTP::UserAgent"
-    ],
-    "provides": {
-        "Lain": "lib/Lain.rakumod"
-    }
+        "Cro::HTTP::Client",
+        "JSON::Fast"
+    ]
 }
