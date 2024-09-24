@@ -1,4 +1,3 @@
-# lib/Helpers/Logger.rakumod
 unit module Helpers::Logger;
 
 my $instance;
