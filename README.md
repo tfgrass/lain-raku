@@ -26,21 +26,11 @@ Users can define their own templates for system and user messages, providing fle
 
 ### Prerequisites
 
-- Raku programming language
+- Raku programming language 
+- Zefs
 - Git
-- LM Studio API access
+- LM Studio 
 
-### From Source (via Homebrew)
-
-1. Install [Homebrew](https://brew.sh) if you haven't already.
-2. Tap the repository:
-   ```
-   brew tap yourusername/lain
-   ```
-3. Install Lain:
-   ```
-   brew install lain
-   ```
 
 ### From Source (Manual)
 
