@@ -8,6 +8,7 @@ use Lain::CLI;        # helper to normalize cli args, set variables from args
 use Lain::CommandRegistry; # submodules may register their commands here
 use Commands::DocCommand;  # `doc` subcommand 
 use Commands::AskCommand;  # `ask` subcommand
+use Commands::ChatCommand; # `chat` subcommand
 
 # Set the log level at initialization
 logger().log-level = 0;  # ToDo: move to Lain::CLI, make configurable from args
