@@ -25,6 +25,7 @@ register-command('chat', -> @args {
         $chat-log ~= "You> {$question}\n";
 
         await answer($lms_connector, $system_message, $question, $chat-log);
+        dd $chat-log;
     }
 });
 
@@ -32,24 +33,28 @@ sub answer(
     Helpers::Connector::LMS::LMSConnector $lms_connector,
     Str $system-message,
     Str $question,
-    Str $chat-log
+    Str $chat-log is rw
 ) {
     # Define a closure to handle partial content
     my $on-content = sub ($partial-content) {
         print $partial-content;  # Print to console
 
         # Append Lain's answer to chat log
-        $chat-log ~= "Lain: {$partial-content}\n";
+        $chat-log ~= "{$partial-content}";
     };
 
     # Create and return a promise
     start {
         try {
+#            $chat-log ~= "Lain> ";
+
             await $lms_connector.send(
                 system-message => $system-message,
                 user-message   => "Previous conversation:\n{$chat-log}Current question: {$question}",
                 on-content     => $on-content
             );
+#            $chat-log ~= "\n";
+
         }
         CATCH {
             default {
