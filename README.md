@@ -17,6 +17,18 @@ lain doc main.py
 
 The `doc` command generates documentation for the given code (`main.py`) by sending a system message that explains that the AI is an assistant for generating documentation, followed by the user message containing the code.
 
+```
+lain ask 'What is love?'
+```
+
+The `ask` command sends the question to the api, trying to answer it one-shot in low-token response.
+
+```
+lain chat
+```
+
+The `chat` command emulates a simple chat client, allowing a conversation with the llm via the api.
+
 ### Customizable Templates
 
 Users can define their own templates for system and user messages, providing flexibility to create tailored interactions.

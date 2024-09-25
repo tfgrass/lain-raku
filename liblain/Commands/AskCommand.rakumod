@@ -37,6 +37,10 @@ sub answer(
         print $partial-content;  # Print to console
     };
 
+    my $on-error = sub ($error) {
+        log(0, "Error during LLM Response: $error");
+    };
+    
     # Define the system message
     my $system_message = "Your name is Lain. You are an AI. You are here to help me. Answer the questions like in an irc chatroom. Answer short and precise. Prefix your answers with 'lain>'.";
 
@@ -46,12 +50,13 @@ sub answer(
             await $lms_connector.send(
                 system-message => $system_message,
                 user-message   => $question,
-                on-content     => $on-content
+                on-content     => $on-content,
+                on-error       => $on-error
             );
         }
         CATCH {
             default {
-                say "Error during LLM Response: $_";
+                log(0, "Error during LLM Response: $_");
             }
         }
         say "\nConnection closed.";

@@ -14,7 +14,7 @@ register-command('chat', -> @args {
     # Initialize chat log as an empty string
     my $chat-log = '';
 
-    say "lain: I'm ready for our chat! Type '/exit' to end it.";
+    say 'Joining chatroom. Type /exit to leave.';
 
     while my $question = prompt("You> ") {
         chomp($question);
@@ -24,10 +24,12 @@ register-command('chat', -> @args {
         # Append current question to chat log
         $chat-log ~= "You> {$question}\n";
 
+        # Await the answer and ensure it completes before proceeding
         await answer($lms_connector, $system_message, $question, $chat-log);
-        dd $chat-log;
+        log(5, $chat-log);
     }
 });
+
 
 sub answer(
     Helpers::Connector::LMS::LMSConnector $lms_connector,
@@ -43,22 +45,25 @@ sub answer(
         $chat-log ~= "{$partial-content}";
     };
 
+    my $on-error = sub ($error) {
+        log(0, "Error during LLM Response: $error");
+    };
+
     # Create and return a promise
     start {
         try {
-#            $chat-log ~= "Lain> ";
 
             await $lms_connector.send(
                 system-message => $system-message,
                 user-message   => "Previous conversation:\n{$chat-log}Current question: {$question}",
-                on-content     => $on-content
+                on-content     => $on-content,
+                on-error       => $on-error
             );
-#            $chat-log ~= "\n";
 
         }
         CATCH {
             default {
-                say "Error during LLM Response: $_";
+                log(0, "Error during LLM Response: $_");
             }
         }
     };

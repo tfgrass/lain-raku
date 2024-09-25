@@ -69,6 +69,10 @@ sub generate-documentation(
         print $partial-content;           # Print to console
         $md-file.print($partial-content); # Write to markdown file
     };
+    
+    my $on-error = sub ($error) {
+        log(0, "Error during LLM Response: $error");
+    };
 
     # Start an asynchronous block
     my $promise = start {
@@ -76,7 +80,8 @@ sub generate-documentation(
             await $lms_connector.send(
                 system-message => $system_message,
                 user-message   => $user_message,
-                on-content     => $on-content
+                on-content     => $on-content,
+                on-error       => $on-error                
             );
         }
         CATCH {
