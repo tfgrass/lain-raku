@@ -6,7 +6,7 @@ use Helpers::Logger;
 
 register-command('chat', -> @args {
     my $lms_connector = Helpers::Connector::LMS::LMSConnector.new();
-    $lms_connector.max-tokens = 75;
+    $lms_connector.max-tokens = 512;
 
     # Define the system message
     my $system_message = "Your name is Lain. You are an AI. You are here to help me. Answer the questions like in an irc chatroom. Answer short and precise. Prefix your answers with 'lain>'. Include previous conversation history when answering.";
