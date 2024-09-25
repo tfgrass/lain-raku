@@ -40,7 +40,7 @@ class LMSConnector {
         );
 
         my $json_payload = to-json(%payload);
-        log(1, "Payload to be sent: $json_payload");
+        log(3, "Payload to be sent: $json_payload");
 
         my $client = Cro::HTTP::Client.new();
 

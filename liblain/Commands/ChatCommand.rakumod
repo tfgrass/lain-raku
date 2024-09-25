@@ -9,20 +9,20 @@ register-command('chat', -> @args {
     $lms_connector.max-tokens = 512;
 
     # Define the system message
-    my $system_message = "Your name is Lain. You are an AI. You are here to help me. Answer the questions like in an irc chatroom. Answer short and precise. Prefix your answers with 'lain>'. Include previous conversation history when answering.";
+    my $system_message = "Your name is Lain. You are an AI. You are here to help me. Answer the questions like in an irc chatroom. Answer short and precise. Prefix your answers with 'lain>'.";
 
     # Initialize chat log as an empty string
     my $chat-log = '';
 
     say 'Joining chatroom. Type /exit to leave.';
 
-    while my $question = prompt("You> ") {
+    while my $question = prompt("\nYou> ") {
         chomp($question);
         # exit if the user types /exit
         last if $question eq '/exit';
 
         # Append current question to chat log
-        $chat-log ~= "You> {$question}\n";
+        $chat-log ~= "User> {$question}\n";
 
         # Await the answer and ensure it completes before proceeding
         await answer($lms_connector, $system_message, $question, $chat-log);
@@ -54,8 +54,8 @@ sub answer(
         try {
 
             await $lms_connector.send(
-                system-message => $system-message,
-                user-message   => "Previous conversation:\n{$chat-log}Current question: {$question}",
+                system-message => $system-message ~ "\nPrevious conversation:\n{$chat-log}\n",
+                user-message   => "{$question}",
                 on-content     => $on-content,
                 on-error       => $on-error
             );
