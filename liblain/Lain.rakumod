@@ -9,7 +9,7 @@ our sub run-cli(@args) is export {
     my $command = @args.shift // 'help';
 
     if $command eq 'version' {
-        say "Lain v0.1.0 09/2024 by tfgrass \n";
+        say "Lain v0.1.1a 09/2024 by tfgrass \n";
 
         say "- somebody said, 'Done is better than perfect.'";
     } elsif $command eq 'help' {
