@@ -1,14 +1,18 @@
 #!/usr/bin/env raku
 
-use lib 'liblain';    # all our main logic is implemented in the liblain directory
-use Helpers::Logger;  # simple logging functionality
+# Dynamically set the library path based on the script's location
+BEGIN {
+    use lib $*PROGRAM.absolute.IO.parent.parent.child('liblain').Str;
+}
 
-use Lain;             # entry module, launches the subtasks, defines internal sub cmds
-use Lain::CLI;        # helper to normalize cli args, set variables from args
-use Lain::CommandRegistry; # submodules may register their commands here
-use Commands::DocCommand;  # `doc` subcommand 
-use Commands::AskCommand;  # `ask` subcommand
-use Commands::ChatCommand; # `chat` subcommand
+use Helpers::Logger;         # simple logging functionality
+use Lain;                    # entry module, launches the subtasks, defines internal sub cmds
+use Lain::CLI;               # helper to normalize cli args, set variables from args
+use Lain::CommandRegistry;   # submodules may register their commands here
+use Commands::DocCommand;    # `doc` subcommand 
+use Commands::AskCommand;    # `ask` subcommand
+use Commands::ChatCommand;   # `chat` subcommand
+use Commands::AutoMergeCommand; # `auto-merge` subcommand
 
 # Set the log level at initialization
 logger().log-level = 0;  # ToDo: move to Lain::CLI, make configurable from args
